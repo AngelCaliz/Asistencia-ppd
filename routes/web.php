@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\DashboardController; // <-- NUEVA IMPORTACIÓN
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Docente;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Estudiante;
 
 // Ruta de bienvenida (Página pública principal)
 Route::get('/', function () {
@@ -32,6 +34,10 @@ Route::middleware(['auth', 'role:docente'])->group(function () {
         return view('docente.panel');
     })->name('docente.panel');
     // Aquí irán las rutas específicas del Docente
+    // Rutas para CU02: Generar Sesión de Clase
+    Route::get('/docente/sesiones/create', [Docente\SesionClaseController::class, 'create'])->name('docente.sesiones.create');
+    Route::post('/docente/sesiones', [Docente\SesionClaseController::class, 'store'])->name('docente.sesiones.store');
+    Route::get('/docente/sesiones/{sesion}', [Docente\SesionClaseController::class, 'show'])->name('docente.sesiones.show');
 });
 
 // Panel del Estudiante (Acceso a CU04: Registro de asistencia)
@@ -40,6 +46,9 @@ Route::middleware(['auth', 'role:estudiante'])->group(function () {
         return view('estudiante.panel');
     })->name('estudiante.panel');
     // Aquí irán las rutas específicas del Estudiante
+    // Rutas para CU05: Registrar Asistencia
+    Route::get('/estudiante/asistencia/registrar', [Estudiante\AsistenciaController::class, 'create'])->name('estudiante.asistencia.create');
+    Route::post('/estudiante/asistencia', [Estudiante\AsistenciaController::class, 'store'])->name('estudiante.asistencia.store');
 });
 
 

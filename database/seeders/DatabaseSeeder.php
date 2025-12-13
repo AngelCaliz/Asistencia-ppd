@@ -15,6 +15,18 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call(RoleUserSeeder::class);
+        $this->call([
+            // 1. Usuarios y Roles (Crea la FK para DocenteProfileSeeder)
+            RoleUserSeeder::class, 
+            
+            // 2. Tablas Maestras (Requeridas por perfiles y sesiones)
+            CursosSeeder::class, 
+            GruposSeeder::class, 
+            
+            // 3. Perfiles (Vincula usuarios con tablas de perfil)
+            DocenteProfileSeeder::class,
+            
+            EsudianteProfileSeeder::class,
+        ]);
     }
 }
