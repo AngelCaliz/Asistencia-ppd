@@ -71,4 +71,39 @@ class SesionClaseController extends Controller
 
         return view('docente.sesiones.show', compact('sesion'));
     }
+    
+    /**
+     * Muestra la lista de todas las sesiones creadas por el docente autenticado.
+     */
+    public function index()
+    {
+        // 1. Obtener el ID del Docente autenticado
+        $docenteId = Auth::user()->docente->id_docente;
+
+        // 2. Obtener las sesiones del docente, ordenadas por más recientes
+        $sesiones = SesionClase::where('docente_id', $docenteId)
+                               ->orderBy('fecha_inicio', 'desc')
+                               ->get();
+
+        return view('docente.sesiones.index', compact('sesiones'));
+    }
+    
+    /**
+     * Muestra la lista de asistencia de una sesión específica (CU03).
+     */
+
+    public function monitor(SesionClase $sesion)
+    {
+        // 1. Verificar autorización: Solo el docente creador puede monitorear
+        if ($sesion->docente_id !== Auth::user()->docente->id_docente) {
+             abort(403, 'Acceso no autorizado.');
+        }
+
+        // 2. Cargar las asistencias y los detalles del estudiante.
+        // Asistencia pertenece a Estudiante, SesionClase pertenece a Curso
+        $asistencias = $sesion->asistencias()->with('estudiante.grupo')->get();
+
+        // 3. Devolver la vista de monitoreo
+        return view('docente.sesiones.monitor', compact('sesion', 'asistencias'));
+    }
 }

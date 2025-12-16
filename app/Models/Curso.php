@@ -2,23 +2,24 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Curso extends Model
 {
+    use HasFactory;
+    
     protected $primaryKey = 'id_curso';
 
+    // Asegurarse de que 'codigo' esté en los fillable
     protected $fillable = [
-        'nombre', 'codigo',
+        'nombre',
+        'codigo', // <--- AGREGAR ESTA LÍNEA
+        'descripcion',
+        'activo',
     ];
 
-    /**
-     * Un Curso tiene muchas Sesiones de Clase.
-     */
-    public function sesionesClase(): HasMany
-    {
-        // Se usa el tercer parámetro 'id_curso' para la PK personalizada
-        return $this->hasMany(SesionClase::class, 'curso_id', 'id_curso');
-    }
+    protected $casts = [
+        'activo' => 'boolean',
+    ];
 }

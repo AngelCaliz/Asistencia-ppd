@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder
             // 3. Perfiles (Vincula usuarios con tablas de perfil)
             DocenteProfileSeeder::class,
             
-            EsudianteProfileSeeder::class,
+            EstudianteProfileSeeder::class,
         ]);
     }
 }

@@ -12,6 +12,7 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     protected $fillable = [
+        'name',
         'email',
         'password',
         'role', // Asegúrate de incluir 'role' si lo añadiste a la migración de users

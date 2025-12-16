@@ -22,13 +22,13 @@
                             </a>
                         </div>
                         
-                        <div class="border p-4 rounded-lg shadow-md hover:bg-green-50 transition duration-150">
-                            <h4 class="text-lg font-semibold text-green-700 mb-2">Monitorear Sesiones Activas (CU03)</h4>
-                            <p class="text-gray-600 mb-3">Consulta el estado y el listado de asistencia de tus sesiones activas o pasadas.</p>
-                            <a href="#" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700">
-                                Ver Mis Sesiones
-                            </a>
-                        </div>
+                    <div class="border p-4 rounded-lg shadow-md hover:bg-green-50 transition duration-150">
+                        <h4 class="text-lg font-semibold text-green-700 mb-2">Monitorear Sesiones Activas (CU03)</h4>
+                        <p class="text-gray-600 mb-3">Consulta el estado y el listado de asistencia de tus sesiones activas o pasadas.</p>
+                        <a href="{{ route('docente.sesiones.index') }}" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700">
+                            Ver Mis Sesiones
+                        </a>
+                    </div>
                         
                     </div>
                 </div>

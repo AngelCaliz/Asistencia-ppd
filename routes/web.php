@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Docente;
+use App\Http\Controllers\Admin;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Estudiante;
 
@@ -33,11 +34,17 @@ Route::middleware(['auth', 'role:docente'])->group(function () {
     Route::get('/docente/panel', function () {
         return view('docente.panel');
     })->name('docente.panel');
+    
     // Aquí irán las rutas específicas del Docente
+
     // Rutas para CU02: Generar Sesión de Clase
     Route::get('/docente/sesiones/create', [Docente\SesionClaseController::class, 'create'])->name('docente.sesiones.create');
     Route::post('/docente/sesiones', [Docente\SesionClaseController::class, 'store'])->name('docente.sesiones.store');
     Route::get('/docente/sesiones/{sesion}', [Docente\SesionClaseController::class, 'show'])->name('docente.sesiones.show');
+
+    // RUTAS NUEVAS PARA CU03: Monitorear Asistencia
+    Route::get('/docente/sesiones', [Docente\SesionClaseController::class, 'index'])->name('docente.sesiones.index');
+    Route::get('/docente/sesiones/{sesion}/monitor', [Docente\SesionClaseController::class, 'monitor'])->name('docente.sesiones.monitor');
 });
 
 // Panel del Estudiante (Acceso a CU04: Registro de asistencia)
@@ -51,6 +58,26 @@ Route::middleware(['auth', 'role:estudiante'])->group(function () {
     Route::post('/estudiante/asistencia', [Estudiante\AsistenciaController::class, 'store'])->name('estudiante.asistencia.store');
 });
 
+// Panel del Administrador (CU06/CU07)
+Route::middleware(['auth', 'role:administrador'])->group(function () {
+    
+    // Panel principal del administrador
+    Route::get('/admin/panel', [Admin\AdminController::class, 'panel'])->name('admin.panel');
+    
+    // Aquí irán rutas futuras de gestión (ej: /admin/docentes, /admin/cursos)
+
+    // Gestión de Docentes (CRUD - CU07)
+    Route::resource('admin/docentes', Admin\DocenteController::class);
+
+    // Gestión de Cursos (NUEVO)
+    Route::resource('cursos', App\Http\Controllers\Admin\CursoController::class)->names('cursos');
+
+    // Gestión de Grupos (NUEVO)
+    Route::resource('grupos', App\Http\Controllers\Admin\GrupoController::class)->names('grupos');
+
+    // Gestión de Estudiantes (NUEVO)
+    Route::resource('estudiantes', App\Http\Controllers\Admin\EstudianteController::class)->names('estudiantes');
+});
 
 // Rutas de Perfil (Accesibles para cualquier rol)
 Route::middleware('auth')->group(function () {

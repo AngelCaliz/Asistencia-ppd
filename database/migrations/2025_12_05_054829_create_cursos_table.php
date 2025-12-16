@@ -6,15 +6,14 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('cursos', function (Blueprint $table) {
             $table->id('id_curso');
-            $table->string('nombre', 100);
-            $table->string('codigo', 10)->unique(); // Ej: PROGWEB-01
+            $table->string('nombre', 100)->unique();
+            $table->string('codigo', 15)->unique(); // <--- AGREGAR ESTA LÍNEA
+            $table->text('descripcion')->nullable();
+            $table->boolean('activo')->default(true);
             $table->timestamps();
         });
     }
