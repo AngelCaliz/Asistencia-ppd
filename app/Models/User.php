@@ -38,7 +38,7 @@ class User extends Authenticatable
      */
     public function docente(): HasOne
     {
-        return $this->hasOne(Docente::class);
+        return $this->hasOne(Docente::class, 'user_id');
     }
 
     /**

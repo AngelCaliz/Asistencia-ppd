@@ -41,25 +41,25 @@ class AsistenciaController extends Controller
 
         // 2. Validar que la sesión esté activa (fecha_inicio <= ahora <= fecha_fin)
         if ($currentTime->isBefore($sesion->fecha_inicio)) {
-             return back()->withErrors(['codigo_sesion' => 'La sesión aún no ha iniciado.'])->withInput();
+            return back()->withErrors(['codigo_sesion' => 'La sesión aún no ha iniciado.'])->withInput();
         }
-        
+
         if ($currentTime->isAfter($sesion->fecha_fin)) {
-             return back()->withErrors(['codigo_sesion' => 'La sesión ha finalizado.'])->withInput();
+            return back()->withErrors(['codigo_sesion' => 'La sesión ha finalizado.'])->withInput();
         }
 
         // 3. Obtener el ID del Estudiante asociado al usuario
         $estudianteId = $user->estudiante->id_estudiante;
-        
+
         // 4. Verificar si ya existe un registro para esta sesión
         $asistenciaExistente = Asistencia::where('estudiante_id', $estudianteId)
-                                         ->where('sesion_clase_id', $sesion->id_sesion)
-                                         ->exists();
+            ->where('sesion_clase_id', $sesion->id_sesion)
+            ->exists();
 
         if ($asistenciaExistente) {
             return back()->with('error', '¡Ya registraste tu asistencia para esta sesión!');
         }
-        
+
         // 5. Determinar el tipo de asistencia (Asistió o Tardanza)
         $tipoAsistencia = ($currentTime->diffInMinutes($sesion->fecha_inicio) <= 15) // Ejemplo: 15 minutos de tolerancia
             ? 'Asistió'
@@ -75,5 +75,20 @@ class AsistenciaController extends Controller
         ]);
 
         return redirect()->route('estudiante.panel')->with('success', '¡Asistencia registrada como: ' . $tipoAsistencia . '!');
+    }
+
+    // Añade este método al final de la clase
+    public function index()
+    {
+        $estudianteId = Auth::user()->estudiante->id_estudiante;
+
+        // Obtenemos las asistencias con la sesión y el curso relacionado
+        $asistencias = Asistencia::with(['sesionClase.asignacion.curso'])
+            ->where('estudiante_id', $estudianteId)
+            ->orderBy('fecha_hora_registro', 'desc')
+            ->take(5) // Mostramos las últimas 5 en el panel
+            ->get();
+
+        return view('estudiante.panel', compact('asistencias'));
     }
 }

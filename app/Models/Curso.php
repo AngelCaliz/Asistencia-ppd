@@ -22,4 +22,8 @@ class Curso extends Model
     protected $casts = [
         'activo' => 'boolean',
     ];
+    
+    public function asignaciones() {
+    return $this->hasMany(Asignacion::class, 'curso_id', 'id_curso');
+}
 }

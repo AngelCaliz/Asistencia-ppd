@@ -30,4 +30,7 @@ class Docente extends Model
         // Se usa el tercer parámetro 'id_docente' para la PK personalizada
         return $this->hasMany(SesionClase::class, 'docente_id', 'id_docente');
     }
+    public function asignaciones() {
+    return $this->hasMany(Asignacion::class, 'docente_id', 'id_docente');
+}
 }

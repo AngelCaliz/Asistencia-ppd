@@ -13,11 +13,12 @@ return new class extends Migration
     {
         Schema::create('sesion_clases', function (Blueprint $table) {
             $table->id('id_sesion');
-            
+
+            $table->unsignedBigInteger('asignacion_id')->nullable(); // Sin el ->after()
             // Referencia a docentes.id_docente
             $table->unsignedBigInteger('docente_id'); // Tipo de dato de la FK
             $table->foreign('docente_id')->references('id_docente')->on('docentes')->onDelete('cascade');
-            
+
             //  Referencia a cursos.id_curso
             $table->unsignedBigInteger('curso_id');
             $table->foreign('curso_id')->references('id_curso')->on('cursos')->onDelete('cascade');
@@ -26,7 +27,9 @@ return new class extends Migration
             $table->dateTime('fecha_inicio');
             $table->dateTime('fecha_fin');
             $table->string('aula', 20);
-            
+
+            $table->foreign('asignacion_id')->references('id_asignacion')->on('asignaciones')->onDelete('set null');
+
             $table->timestamps();
         });
     }

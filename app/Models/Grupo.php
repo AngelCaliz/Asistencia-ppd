@@ -20,4 +20,8 @@ class Grupo extends Model
     {
         return $this->hasMany(Estudiante::class, 'grupo_id', 'id_grupo');
     }
+
+    public function asignaciones() {
+    return $this->hasMany(Asignacion::class, 'grupo_id', 'id_grupo');
+}
 }

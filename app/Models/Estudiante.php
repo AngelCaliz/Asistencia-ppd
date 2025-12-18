@@ -11,7 +11,12 @@ class Estudiante extends Model
     protected $primaryKey = 'id_estudiante';
 
     protected $fillable = [
-        'user_id', 'grupo_id', 'dni', 'nombres', 'apellidos', 'codigo_institucional',
+        'user_id',
+        'grupo_id',
+        'dni',
+        'nombres',
+        'apellidos',
+        'codigo_institucional',
     ];
 
     /**
@@ -37,5 +42,14 @@ class Estudiante extends Model
     {
         // Se usa el tercer parámetro 'id_estudiante' para la PK personalizada
         return $this->hasMany(Asistencia::class, 'estudiante_id', 'id_estudiante');
+    }
+    /**
+     * Accesor para obtener el nombre completo del estudiante.
+     */
+    public function getNombreCompletoAttribute()
+    {
+        // Ajusta los nombres de las columnas según tu tabla 'estudiantes'
+        // Por ejemplo: 'nombres' y 'apellidos'
+        return "{$this->nombres} {$this->apellidos}";
     }
 }

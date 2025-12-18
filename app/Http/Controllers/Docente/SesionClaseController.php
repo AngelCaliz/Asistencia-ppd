@@ -5,25 +5,37 @@ namespace App\Http\Controllers\Docente;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+
 use App\Models\Curso;
+use App\Models\Asignacion;
 use App\Models\SesionClase;
 use Illuminate\Support\Str;
+
 
 class SesionClaseController extends Controller
 {
     /**
      * Muestra el formulario para crear una nueva sesión de clase.
      */
-    public function create()
+    public function create(Request $request)
     {
-        // Obtener el ID del Docente autenticado
-        $docenteId = Auth::user()->docente->id_docente;
+        $docente = Auth::user()->docente;
 
-        // Obtener solo los cursos asociados a este docente (Implementación futura)
-        // Por ahora, listamos todos los cursos para simplificar el formulario.
-        $cursos = Curso::all(); 
+        // 1. Capturamos si viene un ID de asignación por la URL
+        $asignacionId = $request->query('asignacion');
 
-        return view('docente.sesiones.create', compact('cursos'));
+        // 2. Obtenemos las asignaciones del docente para el select
+        $misAsignaciones = Asignacion::with(['curso', 'grupo'])
+            ->where('docente_id', $docente->id_docente)
+            ->where('activo', true)
+            ->get();
+
+        // 3. Si no tiene asignaciones, algo anda mal
+        if ($misAsignaciones->isEmpty()) {
+            return redirect()->route('docente.panel')->with('error', 'No tienes cursos asignados para iniciar sesiones.');
+        }
+
+        return view('docente.sesiones.create', compact('misAsignaciones', 'asignacionId'));
     }
 
     /**
@@ -32,33 +44,39 @@ class SesionClaseController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'curso_id' => 'required|exists:cursos,id_curso',
-            'fecha_inicio' => 'required|date',
-            'fecha_fin' => 'required|date|after:fecha_inicio',
-            'aula' => 'required|string|max:20',
+            'asignacion_id' => 'required|exists:asignaciones,id_asignacion',
+            'fecha_inicio'  => 'required|date',
+            'fecha_fin'     => 'required|date|after:fecha_inicio',
+            'aula'          => 'required|string|max:20',
         ]);
 
-        // 1. Obtener el ID del Docente autenticado
-        $docenteId = Auth::user()->docente->id_docente;
-        
-        // 2. Generar código único (ej: 6 caracteres alfanuméricos)
+        // 1. Obtener la asignación para sacar el curso_id
+        $asignacion = Asignacion::findOrFail($request->asignacion_id);
+
+        // 2. Seguridad: Verificar que la asignación sea del docente logueado
+        if ($asignacion->docente_id !== Auth::user()->docente->id_docente) {
+            abort(403, 'No tienes permiso para crear sesiones en este curso.');
+        }
+
+        // 3. Generar código único de 6 caracteres
         $codigoSesion = strtoupper(Str::random(6));
 
-        // 3. Crear la Sesión de Clase
+        // 4. Crear la Sesión de Clase
         $sesion = SesionClase::create([
-            'docente_id' => $docenteId,
-            'curso_id' => $request->curso_id,
+            'docente_id'    => Auth::user()->docente->id_docente,
+            'asignacion_id' => $asignacion->id_asignacion, // Importante para saber qué grupo es
+            'curso_id'      => $asignacion->curso_id,      // Mantenemos tu estructura original
             'codigo_sesion' => $codigoSesion,
-            'fecha_inicio' => $request->fecha_inicio,
-            'fecha_fin' => $request->fecha_fin,
-            'aula' => $request->aula,
+            'fecha_inicio'  => $request->fecha_inicio,
+            'fecha_fin'     => $request->fecha_fin,
+            'aula'          => $request->aula,
+            'estado'        => 'abierta',
         ]);
 
-        // Redirigir al Docente a la vista de detalle con el código generado
         return redirect()->route('docente.sesiones.show', $sesion->id_sesion)
-                         ->with('success', 'Sesión de clase creada exitosamente. Código: ' . $codigoSesion);
+            ->with('success', 'Sesión de clase creada exitosamente. Código: ' . $codigoSesion);
     }
-    
+
     /**
      * Muestra el detalle de la sesión creada (incluyendo el código).
      */
@@ -66,12 +84,12 @@ class SesionClaseController extends Controller
     {
         // Asegúrate de que solo el docente que la creó pueda verla
         if ($sesion->docente_id !== Auth::user()->docente->id_docente) {
-             abort(403, 'Acceso no autorizado.');
+            abort(403, 'Acceso no autorizado.');
         }
 
         return view('docente.sesiones.show', compact('sesion'));
     }
-    
+
     /**
      * Muestra la lista de todas las sesiones creadas por el docente autenticado.
      */
@@ -82,12 +100,12 @@ class SesionClaseController extends Controller
 
         // 2. Obtener las sesiones del docente, ordenadas por más recientes
         $sesiones = SesionClase::where('docente_id', $docenteId)
-                               ->orderBy('fecha_inicio', 'desc')
-                               ->get();
+            ->orderBy('fecha_inicio', 'desc')
+            ->get();
 
         return view('docente.sesiones.index', compact('sesiones'));
     }
-    
+
     /**
      * Muestra la lista de asistencia de una sesión específica (CU03).
      */
@@ -96,7 +114,7 @@ class SesionClaseController extends Controller
     {
         // 1. Verificar autorización: Solo el docente creador puede monitorear
         if ($sesion->docente_id !== Auth::user()->docente->id_docente) {
-             abort(403, 'Acceso no autorizado.');
+            abort(403, 'Acceso no autorizado.');
         }
 
         // 2. Cargar las asistencias y los detalles del estudiante.

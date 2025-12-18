@@ -8,10 +8,17 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SesionClase extends Model
 {
+    protected $table = 'sesion_clases';
     protected $primaryKey = 'id_sesion';
 
     protected $fillable = [
-        'docente_id', 'curso_id', 'codigo_sesion', 'fecha_inicio', 'fecha_fin', 'aula',
+        'docente_id',
+        'asignacion_id',
+        'curso_id',
+        'codigo_sesion',
+        'fecha_inicio',
+        'fecha_fin',
+        'aula',
     ];
 
     /**
@@ -37,5 +44,9 @@ class SesionClase extends Model
     {
         // Se usa el tercer parámetro 'id_sesion' para la PK personalizada
         return $this->hasMany(Asistencia::class, 'sesion_clase_id', 'id_sesion');
+    }
+    public function asignacion()
+    {
+        return $this->belongsTo(Asignacion::class, 'asignacion_id', 'id_asignacion');
     }
 }
